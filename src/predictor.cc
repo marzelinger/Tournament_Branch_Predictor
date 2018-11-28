@@ -5,11 +5,14 @@ Counter::Counter(){
   currCount = 0;
 }
 
-void Counter::updatePrediction(bool correctPrediction){
-  if(correctPrediction && currCount == 0){
+void Counter::incrementCounter(){
+  if(currCount == 0){
     currCount = 1;
   }
-  else if(!correctPrediction && currCount == 1){
+}
+
+void Counter::incrementCounter(){
+  else if(currCount == 1){
     currCount = 0;
   }
 }
@@ -18,19 +21,24 @@ bool Counter::getPrediction(){
   return currCount == 1;
 }
 
-PREDICTOR::PREDICTOR ()
+Tournament_Predictor::Tournament_Predictor (Predictor* pP1, Predictor* pP2)
 {
-  c = new Counter();
+  p1 = pP1;
+  p2 = pP2;
+  chooser = new Chooser(p1, p2);
 }
 
-bool PREDICTOR::make_prediction (unsigned int pc)
+bool Tournament_Predictor::make_prediction (unsigned int pc)
 {
-  return c->getPrediction();
+  if(chooser->make_prediction(pc)){
+    return p1->make_prediction(pc);
+  }
+  return p2->make_prediction(pc);
 }
 
-void PREDICTOR::train_predictor (unsigned int pc, bool outcome)
+void Tournament_Predictor::train_predictor (unsigned int pc, bool outcome)
 {
-  // printf("Outcome: %d, Guess: %d, ", outcome, c->getPrediction());
-  c->updatePrediction(outcome);
-  // printf("UpdatedGuess: %d\n", c->getPrediction());
+  chooser->train_predictor(pc, outcome);
+  p1->train_predictor(pc, outcome);
+  p2->train_predictor(pc, outcome);
 }

@@ -26,54 +26,38 @@
 
 using namespace std;
 
+class Predictor{
+public:
+  virtual void train_predictor(unsigned int pc, bool outcome) = 0;
+  virtual bool make_prediction() = 0;
+};
+
 class Counter{
 public:
   int currCount;
-  void updatePrediction(bool correctPrediction);
-  bool getPrediction();
+  void incrementCounter();
+  void decrementCounter();
   Counter();
 };
 
-class PREDICTOR{
+class Chooser : public Predictor{
 private:
-  Counter* c;
+  Predictor p1, p2;
 public:
-  PREDICTOR();
-
-class TOURNAMENT_PREDICTOR{
-private:
-
+  void train_predictor(unsigned int pc, bool outcome);
+  bool make_prediction();
+  Chooser(Predictor* pP1, Predictor* pP2);
 }
 
-  /*
-    Make a prediction for conditional branch instruction at PC 'pc'.
-    Returning true indicates a prediction of taken; returning false
-    indicates a prediction of not taken.
-  */
-  bool make_prediction (unsigned int pc);
-
-  /*
-    Train the predictor the last executed branch at PC 'pc' and with
-    outcome 'outcome' (true indicates that the branch was taken, false
-    indicates that the branch was not taken).
-  */
-  void train_predictor (unsigned int pc, bool outcome);
+class Tournament_Predictor : public Predictor {
+private:
+  Chooser* chooser;
+  Predictor p1, p2;
+public:
+  void train_predictor(unsigned int pc, bool outcome);
+  bool make_prediction();
+  Tournament_Predictor(Predictor* pP1, Predictor* pP2);
 };
-
-// class prediction{
-// public:
-//   prediction(int numBits);
-//   void updatePrediction(bool correctPrediction);
-//   bool predictTaken();
-//   int* predictionBits
-// }
-//
-// class table{
-// public:
-//   table();
-//   map<unsigned int, prediction> history;
-//   prediction getHistory();
-// }
 
 
 
