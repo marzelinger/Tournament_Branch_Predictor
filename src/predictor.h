@@ -23,40 +23,73 @@
 #include <iostream>
 #include <iterator>
 #include <map>
+#include <cmath>
 
 using namespace std;
 
 class Predictor{
 public:
   virtual void train_predictor(unsigned int pc, bool outcome) = 0;
-  virtual bool make_prediction() = 0;
+  virtual bool make_prediction(unsigned int pc) = 0;
 };
 
 class Counter{
 public:
   int currCount;
+  int numBits;
   void incrementCounter();
   void decrementCounter();
-  Counter();
+  bool getPrediction();
+  Counter(int pNumBits);
+};
+
+class CorrelatedPredictor : public Predictor{
+  private:
+    int DIRPbits;
+    int BHRbits;
+    std::map<unsigned int, std::map<std::string, Counter*> > history;
+    std::map<unsigned int, std::string> currentBHRMap;
+    bool searchHistory(unsigned int pc, std::string bhr);
+    Counter* getCounter(unsigned int pc, std::string bhr);
+    std::string getBranchHistory(unsigned int pc);
+  public:
+    CorrelatedPredictor(int pNumDIRPBits, int pNumBHRBits);
+    void train_predictor(unsigned int pc, bool outcome);
+    bool make_prediction(unsigned int pc);
+};
+
+class BHT : public Predictor{
+private:
+  std::map<unsigned int, Counter*> history;
+  int numBits;
+  bool searchHistory(unsigned int pc);
+  Counter* getCounter(unsigned int pc);
+public:
+  BHT(int numBits);
+  void train_predictor(unsigned int pc, bool outcome);
+  bool make_prediction(unsigned int pc);
 };
 
 class Chooser : public Predictor{
 private:
-  Predictor p1, p2;
+  BHT* p1;
+  CorrelatedPredictor* p2;
+  BHT* table;
 public:
   void train_predictor(unsigned int pc, bool outcome);
-  bool make_prediction();
-  Chooser(Predictor* pP1, Predictor* pP2);
-}
+  bool make_prediction(unsigned int pc);
+  Chooser(BHT* pP1, CorrelatedPredictor* pP2);
+};
 
-class Tournament_Predictor : public Predictor {
+class Tournament_Predictor : public Predictor{
 private:
   Chooser* chooser;
-  Predictor p1, p2;
+  BHT* p1;
+  CorrelatedPredictor* p2;
 public:
   void train_predictor(unsigned int pc, bool outcome);
-  bool make_prediction();
-  Tournament_Predictor(Predictor* pP1, Predictor* pP2);
+  bool make_prediction(unsigned int pc);
+  Tournament_Predictor(BHT* pP1, CorrelatedPredictor* pP2);
 };
 
 

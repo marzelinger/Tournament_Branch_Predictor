@@ -28,7 +28,10 @@ int main (int argc, char * argv[])
   bool outcome = false;
 
   // Initialize the predictor
-  PREDICTOR* p = new PREDICTOR();
+  BHT* p1 = new BHT(2);
+  CorrelatedPredictor* p2 = new CorrelatedPredictor(2, 2);
+  // BHT* p2 = new BHT(2);
+  Tournament_Predictor* tp = new Tournament_Predictor(p1, p2);
 
   if (argc == 2)
     setup_trace (argv[1]);
@@ -51,11 +54,11 @@ int main (int argc, char * argv[])
     num_branches ++;
 
     // Make a prediction and compare with actual outcome
-    if (p->make_prediction (pc) != outcome)
+    if (tp->make_prediction (pc) != outcome)
       mis_preds ++;
 
     // Train the predictor
-    p->train_predictor (pc, outcome);
+    tp->train_predictor (pc, outcome);
   }
 
   // Print out the mispredict statistics
